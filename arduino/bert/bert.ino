@@ -8,12 +8,11 @@
 
 AccelStepper motor_X(1, MOTOR_X_STEP_PIN, MOTOR_X_DIRECTION_PIN);                                                       // Create X-motor
 
-#define END_SWITCH_RIGHT                        8                                                                       // End switch right side
+#define END_SWITCH_RIGHT                        2                                                                       // End switch right side
 
 #define OFF                                     0                                                                       // Control is switched off
 #define CALIBRATION_MODE                        1                                                                       // Calibrate the zero point  
 #define RUNNING_MODE                            2                                                                       // Steps to a certain position  (positive and negative) 
-
 
 #define PITCH                                   3                                                                       // Traveling distance in mm for 1 rotation
 #define MAXIMUM_TRAVELING_DISTANCE              -200                                                                    // Maximum traveling distance of the spindle in mm
