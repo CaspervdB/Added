@@ -12,6 +12,8 @@ volatile char  CW =             HIGH;                                           
 volatile char CCW =             LOW;                                                                    // CCW, false counter clockwis 
 
 int hulpje =5;
+bool X_Max = false;                                                                                      //De startrichting voor de motor van de X-as
+bool Y_Max = false;                                                                                      //De startrichting voor de motor van de Y-as
 String test;
 void setup () {                                                                                         // The stepper motor used in the IO pin is set to output
     pinMode (MOTOR_X_DIRECTION_PIN, OUTPUT); 
@@ -27,12 +29,19 @@ void setup () {                                                                 
    
     pinMode (ENABLE_MOTORS, OUTPUT);
     digitalWrite (ENABLE_MOTORS, HIGH);                                                                   // LOW zet de motor aan en HIGH zet hem uit
-//     digitalWrite (ENABLE_MOTORS, LOW);
+//    digitalWrite (ENABLE_MOTORS, LOW);
 
     Serial.begin(9600); 
 }
 
 void loop () {
+
+  Y_Aansturen();
+  
+  X_Aansturen();
+
+  delay(1000);
+  
 //    step (false, MOTOR_X_DIRECTION_PIN, MOTOR_X_STEP_PIN, 200);                                        // X axis motor reverse 1 ring, the 200 step is a circle.
 //    step (false, MOTOR_Y_DIRECTION_PIN, MOTOR_Y_STEP_PIN, 200);                                        // y axis motor reverse 1 ring, the 200 step is a circle.
 //    delay (1000);
@@ -44,25 +53,60 @@ void loop () {
 //    runMotor("Motor_X", CW, 200);
 //    runMotor("Motor_Y", CW, 200);
 //    delay (1000);
-//  if(digitalRead(MOTOR_X,_END_STOP) == false)
-//  {
-//    Serial.println("yes");
-//  }
 
-  if (digitalRead(MOTOR_Y_END_STOP) == HIGH)
-  {
-     Serial.println("ja");
-    }
-    else
-    {
-      Serial.println("nee");
-      }
 //  Serial.println(digitalRead(MOTOR_Y_END_STOP));
-   delay (1000);
 ///String help = String(hulpje);
 
 //Serial.write("prutje" + help +" \n");
 } 
+
+/*
+// Function : X_Aansturen . function: om tussen de maximalen van de X-as heen en weer te blijven bewegen .
+// Parameters : /.
+*/
+
+void X_Aansturen()
+{
+  if(digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //Als de END_STOP HIGH is dan is zit hij op zijn max.
+  {
+    runMotor("Motor_X", CCW, 0);                                                                         //Het stilzetten van x-as de motor
+    Serial.println("De X-as is op een maximale waarde");
+    X_Max = !X_Max;                                                                                      //Het omdraaien van de richting van de X-as
+  }else{
+    Serial.println("X niet op de max");
+  }
+  
+  if(X_Max == true)
+  {
+    runMotor("Motor_X", CCW, 200);                                                                        //De motor counterClockWise aanzetten
+  }else{
+    runMotor("Motor_X", CW, 200);                                                                         //De motor clockWise aanzetten
+  }
+}
+
+/*
+// Function : Y_Aansturen . function: om tussen de maximalen van de Y-as heen en weer te blijven bewegen .
+// Parameters : /.
+*/
+
+void Y_Aansturen()
+{
+  if (digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //Als de END_STOP HIGH is dan is zit hij op zijn max.
+  {
+    runMotor("Motor_Y", CCW, 0);                                                                          //Het stilzetten van de Y-as motor
+    Serial.println("De X-as is op een maximale waarde");
+    Y_Max = !Y_Max;                                                                                       //Het omdraaien van de richting van de Y-as
+  }else{
+    Serial.println("Y is niet op de max");
+  }
+
+  if(Y_Max == true)
+  {
+    runMotor("Motor_Y", CCW, 200);                                                                        //De motor counterClockWise aanzetten
+  }else{
+    runMotor("Motor_Y", CW, 200);                                                                         //De motor clockWise aanzetten
+  }
+}
 
 /*
 // Function : step . function: to control the direction of the stepper motor , the number of steps .
