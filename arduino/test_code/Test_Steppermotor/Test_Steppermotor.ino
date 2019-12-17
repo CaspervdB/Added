@@ -5,16 +5,18 @@
 # define MOTOR_X_STEP_PIN         2                                                                     // x -axis stepper control
 # define MOTOR_Y_STEP_PIN         3                                                                     // y -axis stepper control
 # define MOTOR_Z_STEP_PIN         4                                                                     // z -axis stepper control
-# define MOTOR_X_END_STOP         9                                                                    // x -axis end stop
+# define MOTOR_X_END_STOP         9                                                                     // x -axis end stop
 # define MOTOR_Y_END_STOP         10                                                                    // y -axis end stop
 
 volatile char  CW =             HIGH;                                                                   // CW, true clockwise  
 volatile char CCW =             LOW;                                                                    // CCW, false counter clockwis 
 
-int hulpje =5;
+int hulpje = 5;
 bool X_Max = false;                                                                                      //De startrichting voor de motor van de X-as
 bool Y_Max = false;                                                                                      //De startrichting voor de motor van de Y-as
-String test;
+int CoordinatesTotal = 6;                                                                                //Totaal aantal coordinaten * 2
+int Coordinates[] = {5, 6, 1, 3, 7, 2, 1, 1};                                                            //De coordinaten X, Y, X, Y
+
 void setup () {                                                                                         // The stepper motor used in the IO pin is set to output
     pinMode (MOTOR_X_DIRECTION_PIN, OUTPUT); 
     pinMode (MOTOR_X_STEP_PIN, OUTPUT);
@@ -24,24 +26,42 @@ void setup () {                                                                 
     pinMode (MOTOR_Z_STEP_PIN, OUTPUT);
     pinMode (MOTOR_Y_END_STOP, INPUT);
     pinMode (MOTOR_X_END_STOP, INPUT);
-     
 
    
+
     pinMode (ENABLE_MOTORS, OUTPUT);
     digitalWrite (ENABLE_MOTORS, HIGH);                                                                   // LOW zet de motor aan en HIGH zet hem uit
-//    digitalWrite (ENABLE_MOTORS, LOW);
+    digitalWrite (ENABLE_MOTORS, LOW);
 
+    GoToZero();                                                                                           //Go to start position
+
+    delay(10000);
+
+//    MoveTo(Coordinates);
+//
+//    delay(1000);
+    
     Serial.begin(9600); 
 }
 
 void loop () {
-
-  Y_Aansturen();
   
-  X_Aansturen();
+  MoveTo(Coordinates);
 
   delay(1000);
   
+  //Turn_Y_Axis();
+  
+  //Turn_X_Axis();
+  
+  //MoveToCoordinate(5,1);
+
+  //delay(1000);
+
+//  GoToZero();
+//
+//  delay(1000);
+//  
 //    step (false, MOTOR_X_DIRECTION_PIN, MOTOR_X_STEP_PIN, 200);                                        // X axis motor reverse 1 ring, the 200 step is a circle.
 //    step (false, MOTOR_Y_DIRECTION_PIN, MOTOR_Y_STEP_PIN, 200);                                        // y axis motor reverse 1 ring, the 200 step is a circle.
 //    delay (1000);
@@ -61,50 +81,175 @@ void loop () {
 } 
 
 /*
-// Function : X_Aansturen . function: om tussen de maximalen van de X-as heen en weer te blijven bewegen .
+// Function : Turn_X_Axis . function: To make the X-Axis move .
 // Parameters : /.
 */
 
-void X_Aansturen()
+void Turn_X_Axis()
 {
-  if(digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //Als de END_STOP HIGH is dan is zit hij op zijn max.
-  {
-    runMotor("Motor_X", CCW, 0);                                                                         //Het stilzetten van x-as de motor
-    Serial.println("De X-as is op een maximale waarde");
-    X_Max = !X_Max;                                                                                      //Het omdraaien van de richting van de X-as
-  }else{
-    Serial.println("X niet op de max");
-  }
+  X_AxisDirectionChange();
   
   if(X_Max == true)
   {
-    runMotor("Motor_X", CCW, 200);                                                                        //De motor counterClockWise aanzetten
+    runMotor("Motor_X", CCW, 200);                                                                        //Turns X-Axis counterClockWise
   }else{
-    runMotor("Motor_X", CW, 200);                                                                         //De motor clockWise aanzetten
+    runMotor("Motor_X", CW, 200);                                                                         //Turns the X-Axis clockWise
   }
 }
 
 /*
-// Function : Y_Aansturen . function: om tussen de maximalen van de Y-as heen en weer te blijven bewegen .
+// Function : X_AxisDirectionChange . function: To change direction of the X-Axis when it has reached its max .
 // Parameters : /.
 */
 
-void Y_Aansturen()
+void X_AxisDirectionChange()
 {
-  if (digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //Als de END_STOP HIGH is dan is zit hij op zijn max.
+  if(digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //When END_STOP is HIGH the X-Axis has reached its max
   {
-    runMotor("Motor_Y", CCW, 0);                                                                          //Het stilzetten van de Y-as motor
+    runMotor("Motor_X", CCW, 0);                                                                         //Stops the X-axis from moving
     Serial.println("De X-as is op een maximale waarde");
-    Y_Max = !Y_Max;                                                                                       //Het omdraaien van de richting van de Y-as
+    X_Max = !X_Max;                                                                                      //Changes the direction of movement for the X-Axis
+  }else{
+    Serial.println("X niet op de max");
+  }
+}
+
+/*
+// Function : Turn_Y_Axis . function: To make the Y-Axis move .
+// Parameters : /.
+*/
+
+void Turn_Y_Axis()
+{
+  Y_AxisDirectionChange();
+  
+  if(Y_Max == true)
+  {
+    runMotor("Motor_Y", CCW, 200);                                                                        //Turns the Y-Axis counterClockWise
+  }else{
+    runMotor("Motor_Y", CW, 200);                                                                         //Turns the Y-Axis clockWise
+  }
+}
+
+/*
+// Function : Y_AxisDirectionChange . function: To change direction of the Y-Axis when it has reached its max .
+// Parameters : /.
+*/
+
+void Y_AxisDirectionChange()
+{
+  if (digitalRead(MOTOR_Y_END_STOP) == HIGH)                                                              //When END_STOP is HIGH the Y-Axis has reached its max
+  {
+    runMotor("Motor_Y", CCW, 0);                                                                          //Stops the X-axis from moving. Could be removed???
+    Serial.println("De X-as is op een maximale waarde");
+    Y_Max = !Y_Max;                                                                                       //Changes the direction of movement for the Y-Axis
   }else{
     Serial.println("Y is niet op de max");
   }
+}
 
-  if(Y_Max == true)
+void MoveTo(int Coordinates[])                                                     //Array containts: Coordinate X, Coordinate Y, Coordinate X, etc.
+{
+  for (int i = 0; i <= (CoordinatesTotal - 1); i++)
   {
-    runMotor("Motor_Y", CCW, 200);                                                                        //De motor counterClockWise aanzetten
-  }else{
-    runMotor("Motor_Y", CW, 200);                                                                         //De motor clockWise aanzetten
+    for (int j = (CoordinatesTotal - 1); j >= 0 && j > i; j--)
+    {
+      if((i % 2) == 0 && (j % 2) == 0)
+      {
+        Coordinates[j] = Coordinates[j] - Coordinates[i];
+      } 
+      if((i % 2) == 1 && (j % 2) == 1)
+      {
+        Coordinates[j] = Coordinates[j] - Coordinates[i];
+      }
+//    int Coordinates[6] = {5, 6, 1, 3, 7, 2}; 
+//    sizeof(Coordinates) / sizeof(Coordinates[0])
+//    Serial.println(Coordinates[i]);
+//    Serial.println(Coordinates[j]);
+      
+//      delay(10000);
+    }
+  }
+
+  for (int i = 0; i <= (CoordinatesTotal - 1); i = i+2)
+  {
+    MoveToCoordinate(Coordinates[i], Coordinates[i+1]);
+    Serial.println(Coordinates[i]);
+    Serial.println(Coordinates[i+1]);
+    delay(10000);
+  }
+  GoToZero();
+}
+
+void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
+{
+  if(Coordinate_Y > 0)
+  {
+    runMotor("Motor_Y", CW, 200);
+    Coordinate_Y = Coordinate_Y - 1;
+    delay(1000);
+  }
+  if(Coordinate_X > 0)
+  {
+    runMotor("Motor_X", CW, 200);
+    Coordinate_X = Coordinate_X - 1;
+    delay(1000);
+  }
+  
+  while(Coordinate_Y != 0 || Coordinate_X != 0)
+  {
+    if(Coordinate_Y > 0)
+    {
+      if(digitalRead(MOTOR_Y_END_STOP) == LOW)
+      {
+        runMotor("Motor_Y", CW, 200);
+        delay(1000);
+      }
+      Coordinate_Y = Coordinate_Y - 1;
+    }
+    if(Coordinate_Y < 0)
+    {
+      if(digitalRead(MOTOR_Y_END_STOP) == LOW)
+      {
+        runMotor("Motor_Y", CCW, 200);
+        delay(1000);
+      }
+      Coordinate_Y = Coordinate_Y + 1;
+    }
+    if(Coordinate_X > 0)
+    {
+      if(digitalRead(MOTOR_X_END_STOP) == LOW)
+      {
+        runMotor("Motor_X", CW, 200);
+        delay(1000);
+      }
+      Coordinate_X = Coordinate_X - 1;
+    }
+    if(Coordinate_X < 0)
+    {
+      if(digitalRead(MOTOR_X_END_STOP) == LOW)
+      {
+        runMotor("Motor_X", CCW, 200);
+        delay(1000);
+      }
+      Coordinate_X = Coordinate_X + 1;
+    }
+  }
+//  GoToZero();
+}
+
+void GoToZero()
+{
+  while(digitalRead(MOTOR_Y_END_STOP) == LOW || digitalRead(MOTOR_X_END_STOP) == LOW)
+  {
+    if(digitalRead(MOTOR_Y_END_STOP) == LOW)
+    {
+      runMotor("Motor_Y", CCW, 200);
+    }
+    if(digitalRead(MOTOR_X_END_STOP) == LOW)
+    {
+      runMotor("Motor_X", CCW, 200);
+    }
   }
 }
 
@@ -123,7 +268,6 @@ void stapje (byte stepperPin, int steps)
         delayMicroseconds (800);
     }
 }
-
 
 void runMotor(String motor, char motorDirection, int steps)
 {
