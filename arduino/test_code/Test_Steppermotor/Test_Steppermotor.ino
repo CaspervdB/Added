@@ -14,7 +14,7 @@ volatile char CCW =             LOW;                                            
 int hulpje = 5;
 bool X_Max = false;                                                                                      //De startrichting voor de motor van de X-as
 bool Y_Max = false;                                                                                      //De startrichting voor de motor van de Y-as
-int CoordinatesTotal = 6;                                                                                //Totaal aantal coordinaten * 2
+int CoordinatesTotal = 4;                                                                                //Totaal aantal coordinaten
 int Coordinates[] = {5, 6, 1, 3, 7, 2, 1, 1};                                                            //De coordinaten X, Y, X, Y
 
 void setup () {                                                                                         // The stepper motor used in the IO pin is set to output
@@ -33,51 +33,18 @@ void setup () {                                                                 
     digitalWrite (ENABLE_MOTORS, HIGH);                                                                   // LOW zet de motor aan en HIGH zet hem uit
     digitalWrite (ENABLE_MOTORS, LOW);
 
-    GoToZero();                                                                                           //Go to start position
+    //runMotor("Motor_X", CCW, 200);
+    //runMotor("Motor_Y", CCW, 200);
+
+    GoHome();                                                                                           //Go to start position
 
     delay(10000);
-
-//    MoveTo(Coordinates);
-//
-//    delay(1000);
     
     Serial.begin(9600); 
 }
 
 void loop () {
-  
   MoveTo(Coordinates);
-
-  delay(1000);
-  
-  //Turn_Y_Axis();
-  
-  //Turn_X_Axis();
-  
-  //MoveToCoordinate(5,1);
-
-  //delay(1000);
-
-//  GoToZero();
-//
-//  delay(1000);
-//  
-//    step (false, MOTOR_X_DIRECTION_PIN, MOTOR_X_STEP_PIN, 200);                                        // X axis motor reverse 1 ring, the 200 step is a circle.
-//    step (false, MOTOR_Y_DIRECTION_PIN, MOTOR_Y_STEP_PIN, 200);                                        // y axis motor reverse 1 ring, the 200 step is a circle.
-//    delay (1000);
-//    step (true, MOTOR_Y_DIRECTION_PIN, MOTOR_Y_STEP_PIN, 10);                                          // X axis motor forward 1 laps, the 200 step is a circle.
-//    step (MOTOR_Y_DIRECTION_PIN, MOTOR_Y_STEP_PIN, 50);                                                // y axis motor forward 1 laps, the 200 step is a circle.
-//    runMotor("Motor_X", CCW, 200);
-//    runMotor("Motor_Y", CCW, 200);
-//    delay (1000);
-//    runMotor("Motor_X", CW, 200);
-//    runMotor("Motor_Y", CW, 200);
-//    delay (1000);
-
-//  Serial.println(digitalRead(MOTOR_Y_END_STOP));
-///String help = String(hulpje);
-
-//Serial.write("prutje" + help +" \n");
 } 
 
 /*
@@ -148,38 +115,48 @@ void Y_AxisDirectionChange()
   }
 }
 
+/*
+// Function : MoveTo . function: To calculate the amount of steps to move from current location.
+// Parameters : int Coordinates[] array of Coordinates.
+*/
+
 void MoveTo(int Coordinates[])                                                     //Array containts: Coordinate X, Coordinate Y, Coordinate X, etc.
 {
-  for (int i = 0; i <= (CoordinatesTotal - 1); i++)
-  {
-    for (int j = (CoordinatesTotal - 1); j >= 0 && j > i; j--)
-    {
-      if((i % 2) == 0 && (j % 2) == 0)
-      {
-        Coordinates[j] = Coordinates[j] - Coordinates[i];
-      } 
-      if((i % 2) == 1 && (j % 2) == 1)
-      {
-        Coordinates[j] = Coordinates[j] - Coordinates[i];
-      }
-//    int Coordinates[6] = {5, 6, 1, 3, 7, 2}; 
-//    sizeof(Coordinates) / sizeof(Coordinates[0])
-//    Serial.println(Coordinates[i]);
-//    Serial.println(Coordinates[j]);
-      
-//      delay(10000);
-    }
-  }
+  Serial.println(Coordinates[0]);
+  Serial.println(Coordinates[1]);
+  
+  MoveToCoordinate(Coordinates[0], Coordinates[1]);
+  
+  Serial.print("Ik ben op: ");
+  Serial.print(Coordinates[0]);
+  Serial.print(",");
+  Serial.println(Coordinates[1]);
 
-  for (int i = 0; i <= (CoordinatesTotal - 1); i = i+2)
+  delay(10000);
+  
+  for (int i = 0; i <= CoordinatesTotal; i = i+2)
   {
-    MoveToCoordinate(Coordinates[i], Coordinates[i+1]);
-    Serial.println(Coordinates[i]);
-    Serial.println(Coordinates[i+1]);
-    delay(10000);
+    int MoveX = Coordinates[i+2] - Coordinates[i];
+    int MoveY = Coordinates[i+3] - Coordinates[i+1];
+    Serial.println(MoveX);
+    Serial.println(MoveY);
+    
+    MoveToCoordinate(MoveX, MoveY);
+    
+    Serial.print("Ik ben op: ");
+    Serial.print(Coordinates[i+2]);
+    Serial.print(",");
+    Serial.println(Coordinates[i+3]);
   }
-  GoToZero();
+  Serial.println(0 - Coordinates[CoordinatesTotal]);
+  Serial.println(0 - Coordinates[CoordinatesTotal + 1]);
+  GoHome();
 }
+
+/*
+// Function : MoveToCoordinate . function: to move the XYZ-Table.
+// Parameters :int Coordinate_X is coordinate X, int Coordinate_Y is coordinate Y.
+*/
 
 void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
 {
@@ -235,10 +212,14 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
       Coordinate_X = Coordinate_X + 1;
     }
   }
-//  GoToZero();
 }
 
-void GoToZero()
+/*
+// Function : GoHome . function: To move the XYZ-Table to Coordinates 0,0(home).
+// Parameters :
+*/
+
+void GoHome()
 {
   while(digitalRead(MOTOR_Y_END_STOP) == LOW || digitalRead(MOTOR_X_END_STOP) == LOW)
   {
@@ -251,6 +232,7 @@ void GoToZero()
       runMotor("Motor_X", CCW, 200);
     }
   }
+  Serial.println("Ik ben op: 0,0");
 }
 
 /*
