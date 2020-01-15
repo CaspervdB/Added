@@ -64,20 +64,33 @@ void loop () {
 //    Serial.println(Coordinates[0] + Coordinates[1]);
   //}
   //MoveTo(Coordinates, CoordinatesTotal);
-  //int Coordinates[1000];
+  int coordinates[1000];
   while(Serial.available())
   {
-    int CoordinateX = Serial.readStringUntil(',').toInt();
+    int amountOfCoordinates = 4;
+
+    for(int i=0; i < amountOfCoordinates; i++) {
+      coordinates[i] = Serial.readStringUntil(',').toInt();
+      i++;
+      coordinates[i] = Serial.readStringUntil(',').toInt();;
+    }
+
     Serial.read();
-    int CoordinateY = Serial.readStringUntil(',').toInt();
-    Serial.read();
-    Serial.print("Coordinate X = ");
-    Serial.println(CoordinateX);
-    Serial.print("Coordinate Y = ");
-    Serial.println(CoordinateY);
+    for(int i = 0; i < amountOfCoordinates; i++) {
+      Serial.println(coordinates[i]);
+    }
     
-    MoveToCoordinate(CoordinateX, CoordinateY);
-    GoHome();
+//    int CoordinateX = Serial.readStringUntil(',').toInt();
+//    Serial.read();
+//    int CoordinateY = Serial.readStringUntil(',').toInt();
+//    Serial.read();
+//    Serial.print("Coordinate X = ");
+//    Serial.println(CoordinateX);
+//    Serial.print("Coordinate Y = ");
+//    Serial.println(CoordinateY);
+    
+//    MoveToCoordinate(CoordinateX, CoordinateY);
+//    GoHome();
   }
 } 
 
