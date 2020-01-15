@@ -14,8 +14,8 @@ volatile char CCW =             LOW;                                            
 int hulpje = 5;
 bool X_Max = false;                                                                                      //De startrichting voor de motor van de X-as
 bool Y_Max = false;                                                                                      //De startrichting voor de motor van de Y-as
-int CoordinatesTotal = 4;                                                                                //Totaal aantal coordinaten
-int Coordinates[] = {5, 6, 1, 3, 7, 2, 1, 1};                                                            //De coordinaten X, Y, X, Y
+//int CoordinatesTotal = 4;                                                                                //Totaal aantal coordinaten
+//int Coordinates[] = {5, 6, 1, 3, 7, 2, 1, 1};                                                            //De coordinaten X, Y, X, Y
 
 void setup () {                                                                                         // The stepper motor used in the IO pin is set to output
     pinMode (MOTOR_X_DIRECTION_PIN, OUTPUT); 
@@ -38,13 +38,47 @@ void setup () {                                                                 
 
     GoHome();                                                                                           //Go to start position
 
-    delay(10000);
+    while (!Serial);
+    Serial.println("Enter coordinates");
+
+    delay(1000);
     
     Serial.begin(9600); 
 }
 
 void loop () {
-  MoveTo(Coordinates);
+//  int CoordinatesTotal = 0;
+//  int Coordinates[1000];
+  //while(Serial.available() > 0)
+  //{
+//    String CoordinateX = Serial.readStringUntil(',');
+//    Serial.read();
+//    String CoordinateY = Serial.readStringUntil(',');
+//    Serial.read();
+//    Serial.println(CoordinateX);
+//    Coordinates[CoordinatesTotal] = CoordinateX.toInt();
+//    CoordinatesTotal++;
+//    Serial.println(CoordinateY);
+//    Coordinates[CoordinatesTotal] = CoordinateY.toInt();
+//    CoordinatesTotal++;
+//    Serial.println(Coordinates[0] + Coordinates[1]);
+  //}
+  //MoveTo(Coordinates, CoordinatesTotal);
+  //int Coordinates[1000];
+  while(Serial.available())
+  {
+    int CoordinateX = Serial.readStringUntil(',').toInt();
+    Serial.read();
+    int CoordinateY = Serial.readStringUntil(',').toInt();
+    Serial.read();
+    Serial.print("Coordinate X = ");
+    Serial.println(CoordinateX);
+    Serial.print("Coordinate Y = ");
+    Serial.println(CoordinateY);
+    
+    MoveToCoordinate(CoordinateX, CoordinateY);
+    GoHome();
+  }
 } 
 
 /*
@@ -120,7 +154,7 @@ void Y_AxisDirectionChange()
 // Parameters : int Coordinates[] array of Coordinates.
 */
 
-void MoveTo(int Coordinates[])                                                     //Array containts: Coordinate X, Coordinate Y, Coordinate X, etc.
+void MoveTo(int Coordinates[], int CoordinatesTotal)                                                     //Array containts: Coordinate X, Coordinate Y, Coordinate X, etc.
 {
   Serial.println(Coordinates[0]);
   Serial.println(Coordinates[1]);
