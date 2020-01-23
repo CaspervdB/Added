@@ -3,7 +3,7 @@ import numpy as np
 import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ("169.254.123.186", 23)
+server_address = ("169.254.15.31", 23)
 print("Start connection")
 s.connect(server_address) 
 cmd = "admin\r\n\r\n".encode()
@@ -13,9 +13,8 @@ s.sendall("SE8\n\r".encode())
 print("Command sent!")
 print("End connection!")
 
-#open image
+#Upload image
 
-#Identify holes
 
 min_threshold = 10                      # these values are used to filter our detector.
 max_threshold = 200                     # they can be tweaked depending on the camera distance, camera angle, ...
