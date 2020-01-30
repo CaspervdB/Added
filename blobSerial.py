@@ -9,13 +9,14 @@ import os
 import glob
 import time
 
+#The USB0 part  can change depending on what port the arduino is assinged on the pi, to check, use the arduino IDE
 ser1 = serial.Serial('/dev/ttyUSB0', 9600)
 xyList = []
 
 
 #Connect with the cognex camera
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ("192.168.0.101", 23)
+server_address = ("192.168.0.101", 23)	#Check for the IP of the camera on the router
 print("Start connection")
 s.connect(server_address) 
 cmd = "admin\r\n\r\n".encode()
@@ -99,6 +100,7 @@ for key in keypoints:
 print("Total keypoints found:",len(keypoints))
 print("Keypoints used:", round(len(xyList) / 2))
 
+#Draw a line on the picture, to show how far the table can reach
 img_mod = cv2.line(im_with_keypoints,(im_with_keypoints.shape[1],im_with_keypoints.shape[1]),(0,im_with_keypoints.shape[1]),(0,0,255),1)
 cv2.imshow("Keypoints", img_mod)
 
