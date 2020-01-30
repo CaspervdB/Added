@@ -7,14 +7,11 @@ import serial
 import socket
 import os
 import glob
+import time
 
-ser1 = serial.Serial('/dev/ttyUSB1', 9600)
+ser1 = serial.Serial('/dev/ttyUSB0', 9600)
 xyList = []
 
-#Get the name of the latest file
-list_of_files = glob.glob('share/*.JPG') # * means all if need specific format then *.csv
-latest_file = max(list_of_files, key=os.path.getctime)
-print(latest_file)
 
 #Connect with the cognex camera
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,10 +25,17 @@ s.sendall("SE8\n\r".encode())
 print("Command sent!")
 print("End connection!")
 
+#Wait 5 seconds to allow for the image to load
+time.sleep(5)
+
+#Get the name of the latest file
+list_of_files = glob.glob('share/*.JPG') # * means all if need specific format then *.csv
+latest_file = max(list_of_files, key=os.path.getctime)
+print(latest_file)
+
 # Read image
 img = cv2.imread(latest_file, cv2.IMREAD_GRAYSCALE)
-rotated = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
-im = cv2.resize(rotated,(480, 640))
+im = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
 
 # Setup SimpleBlobDetector parameters.
 params = cv2.SimpleBlobDetector_Params()
@@ -75,10 +79,7 @@ keypoints = detector.detect(im)
 
 im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-# Show blobs in a resized window
-#im_with_keypoints_resized = cv2.resize(im_with_keypoints, (w / 2, h / 2))
-img_mod = cv2.line(im_with_keypoints,(im_with_keypoints.shape[1],im_with_keypoints.shape[1]),(0,im_with_keypoints.shape[1]),(0,0,255),1)
-cv2.imshow("Keypoints", img_mod)
+
 
 # Print the keypoint id and the X and Y coordinates of the blobs found
 for key in keypoints:
@@ -92,10 +93,14 @@ for key in keypoints:
         xyList.append(variableX)
         xyList.append(variableY)
     print("X:", 100 - variableX, "Y:", 100 - variableY)
+    cv2.circle(im_with_keypoints,(round(key.pt[0]), round(key.pt[1])), 1, (255, 255, 255), -1)
     
 # Print the total amount of keypoints (blobs) found
 print("Total keypoints found:",len(keypoints))
 print("Keypoints used:", round(len(xyList) / 2))
+
+img_mod = cv2.line(im_with_keypoints,(im_with_keypoints.shape[1],im_with_keypoints.shape[1]),(0,im_with_keypoints.shape[1]),(0,0,255),1)
+cv2.imshow("Keypoints", img_mod)
 
 for xy in xyList:
     ser1.write(str(xy).encode())

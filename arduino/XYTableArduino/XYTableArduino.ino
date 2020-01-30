@@ -10,12 +10,9 @@
 
 volatile char  CW =             HIGH;                                                                   // CW, true clockwise  
 volatile char CCW =             LOW;                                                                    // CCW, false counter clockwis 
-
-int hulpje = 5;
-bool X_Max = false;                                                                                      //De startrichting voor de motor van de X-as
-bool Y_Max = false;                                                                                      //De startrichting voor de motor van de Y-as
-//int CoordinatesTotal = 4;                                                                                //Totaal aantal coordinaten
-//int Coordinates[] = {5, 6, 1, 3, 7, 2, 1, 1};                                                            //De coordinaten X, Y, X, Y
+int stapGrootte = 55;                                                                                   //The size of the steps. 55 is for 100 steps in 9,9 CM
+bool X_Max = false;                                                                                     //De startrichting voor de motor van de X-as
+bool Y_Max = false;                                                                                     //De startrichting voor de motor van de Y-as
 
 void setup () {                                                                                         // The stepper motor used in the IO pin is set to output
     pinMode (MOTOR_X_DIRECTION_PIN, OUTPUT); 
@@ -47,27 +44,11 @@ void setup () {                                                                 
 }
 
 void loop () {
-//  int CoordinatesTotal = 0;
-//  int Coordinates[1000];
-  //while(Serial.available() > 0)
-  //{
-//    String CoordinateX = Serial.readStringUntil(',');
-//    Serial.read();
-//    String CoordinateY = Serial.readStringUntil(',');
-//    Serial.read();
-//    Serial.println(CoordinateX);
-//    Coordinates[CoordinatesTotal] = CoordinateX.toInt();
-//    CoordinatesTotal++;
-//    Serial.println(CoordinateY);
-//    Coordinates[CoordinatesTotal] = CoordinateY.toInt();
-//    CoordinatesTotal++;
-//    Serial.println(Coordinates[0] + Coordinates[1]);
-  //}
-  //MoveTo(Coordinates, CoordinatesTotal);
-  int coordinates[4] = {};
+  
+  int coordinates[10] = {};
   while(Serial.available())
   {
-    int amountOfCoordinates = 4;
+    int amountOfCoordinates = 10;                                                                         //In this case, it will take 10 / 2 = 5 sets of coordinates, but it can be changed for other use cases
 
     for(int i=0; i < amountOfCoordinates; i++) {
       coordinates[i] = Serial.readStringUntil(',').toInt();
@@ -79,22 +60,12 @@ void loop () {
     for(int i = 0; i < amountOfCoordinates; i++) {
       Serial.println(coordinates[i]);
     }
-    
-//    int CoordinateX = Serial.readStringUntil(',').toInt();
-//    Serial.read();
-//    int CoordinateY = Serial.readStringUntil(',').toInt();
-//    Serial.read();
-//    Serial.print("Coordinate X = ");
-//    Serial.println(CoordinateX);
-//    Serial.print("Coordinate Y = ");
-//    Serial.println(CoordinateY);
 
       for(int i = 0; i < amountOfCoordinates; i++) {
         MoveToCoordinate(coordinates[i], coordinates[i++]);
+        delay(2000); //Time to stop after reaching coordinates
         GoHome();
       }
-//    MoveToCoordinate(CoordinateX, CoordinateY);
-//    GoHome();
   }
 } 
 
@@ -109,9 +80,9 @@ void Turn_X_Axis()
   
   if(X_Max == true)
   {
-    runMotor("Motor_X", CCW, 200);                                                                        //Turns X-Axis counterClockWise
+    runMotor("Motor_X", CCW, stapGrootte);                                                                        //Turns X-Axis counterClockWise
   }else{
-    runMotor("Motor_X", CW, 200);                                                                         //Turns the X-Axis clockWise
+    runMotor("Motor_X", CW, stapGrootte);                                                                         //Turns the X-Axis clockWise
   }
 }
 
@@ -143,9 +114,9 @@ void Turn_Y_Axis()
   
   if(Y_Max == true)
   {
-    runMotor("Motor_Y", CCW, 200);                                                                        //Turns the Y-Axis counterClockWise
+    runMotor("Motor_Y", CCW, stapGrootte);                                                                        //Turns the Y-Axis counterClockWise
   }else{
-    runMotor("Motor_Y", CW, 200);                                                                         //Turns the Y-Axis clockWise
+    runMotor("Motor_Y", CW, stapGrootte);                                                                         //Turns the Y-Axis clockWise
   }
 }
 
@@ -183,7 +154,7 @@ void MoveTo(int Coordinates[], int CoordinatesTotal)                            
   Serial.print(",");
   Serial.println(Coordinates[1]);
 
-  delay(10000);
+  //delay(10000);
   
   for (int i = 0; i <= CoordinatesTotal; i = i+2)
   {
@@ -213,15 +184,15 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
 {
   if(Coordinate_Y > 0)
   {
-    runMotor("Motor_Y", CW, 200);
+    runMotor("Motor_Y", CW, stapGrootte);
     Coordinate_Y = Coordinate_Y - 1;
-    delay(1000);
+    //delay(1000);
   }
   if(Coordinate_X > 0)
   {
-    runMotor("Motor_X", CW, 200);
+    runMotor("Motor_X", CW, stapGrootte);
     Coordinate_X = Coordinate_X - 1;
-    delay(1000);
+    //delay(1000);
   }
   
   while(Coordinate_Y != 0 || Coordinate_X != 0)
@@ -230,8 +201,8 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
     {
       if(digitalRead(MOTOR_Y_END_STOP) == LOW)
       {
-        runMotor("Motor_Y", CW, 200);
-        delay(1000);
+        runMotor("Motor_Y", CW, stapGrootte);
+        //delay(1000);
       }
       Coordinate_Y = Coordinate_Y - 1;
     }
@@ -239,8 +210,8 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
     {
       if(digitalRead(MOTOR_Y_END_STOP) == LOW)
       {
-        runMotor("Motor_Y", CCW, 200);
-        delay(1000);
+        runMotor("Motor_Y", CCW, stapGrootte);
+        //delay(1000);
       }
       Coordinate_Y = Coordinate_Y + 1;
     }
@@ -248,8 +219,8 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
     {
       if(digitalRead(MOTOR_X_END_STOP) == LOW)
       {
-        runMotor("Motor_X", CW, 200);
-        delay(1000);
+        runMotor("Motor_X", CW, stapGrootte);
+        //delay(1000);
       }
       Coordinate_X = Coordinate_X - 1;
     }
@@ -257,8 +228,8 @@ void MoveToCoordinate(int Coordinate_X, int Coordinate_Y)
     {
       if(digitalRead(MOTOR_X_END_STOP) == LOW)
       {
-        runMotor("Motor_X", CCW, 200);
-        delay(1000);
+        runMotor("Motor_X", CCW, stapGrootte);
+        //delay(1000);
       }
       Coordinate_X = Coordinate_X + 1;
     }
@@ -276,14 +247,13 @@ void GoHome()
   {
     if(digitalRead(MOTOR_Y_END_STOP) == LOW)
     {
-      runMotor("Motor_Y", CCW, 200);
+      runMotor("Motor_Y", CCW, stapGrootte);
     }
     if(digitalRead(MOTOR_X_END_STOP) == LOW)
     {
-      runMotor("Motor_X", CCW, 200);
+      runMotor("Motor_X", CCW, stapGrootte);
     }
   }
-  Serial.println("Ik ben op: 0,0");
 }
 
 /*

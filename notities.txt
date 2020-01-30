@@ -1,0 +1,5 @@
+https://github.com/CaspervdB/Added.git
+ZLX5CwzH0jYTiTn3UPapvl1NuuAvAgXl (UltraHook API Key)
+https://www.pyimagesearch.com/2015/02/23/install-opencv-and-python-on-your-raspberry-pi-2-and-b/
+https://medium.com/@aadeshshah/pre-installed-and-pre-configured-raspbian-with-opencv-4-1-0-for-raspberry-pi-3-model-b-b-9c307b9a993a
+https://www.instructables.com/id/How-to-Communicate-With-Arduino-From-a-Python-Scri/
